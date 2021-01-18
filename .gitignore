@@ -1,3 +1,4 @@
-env
+telloenv
 __pycache__
 .vscode
+resources

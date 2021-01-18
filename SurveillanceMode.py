@@ -1,15 +1,18 @@
 import module.keypress as kp
 from djitellopy import Tello
-from time import sleep
+import time
+import cv2
 
 kp.init()
 
 tello = Tello()
 tello.connect()
+tello.streamon()
 
 SPEED = 50
 YAW_SPEED = 150
 is_flying = False
+global img
 
 def get_input():
     left_right, front_back, up_down, yaw = 0, 0, 0, 0
@@ -26,9 +29,16 @@ def get_input():
     if kp.get_key("a"): yaw = -YAW_SPEED
     if kp.get_key("d"): yaw = YAW_SPEED
 
+    if kp.get_key("p"):
+        cv2.imwrite(f"resources/images/{time.time()}.jpg", img)
+        time.sleep(0.3)
+
     return [left_right, front_back, up_down, yaw]
 
 while True:
+    img = tello.get_frame_read().frame
+    img = cv2.resize(img, (360, 240))
+    cv2.imshow("Tello View", img)
     if not is_flying:
         if kp.get_key("RETURN"): 
             tello.takeoff()
@@ -40,5 +50,5 @@ while True:
         else:
             velocity = get_input()
             tello.send_rc_control(velocity[0], velocity[1], velocity[2], velocity[3])
-    sleep(0.05)
+    cv2.waitKey(1)
 
